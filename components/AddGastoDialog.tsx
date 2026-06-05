@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,29 +20,60 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { dateString } from '@/lib/dateHelpers';
-import type { Gasto } from '@/lib/types';
+import { detectSubcategoria } from '@/lib/gastoHelpers';
+import type { Gasto, GastoSubcategoria } from '@/lib/types';
+
+const RECURRENCIA_TIPOS = ['días', 'semanas', 'meses', 'años'];
+const SUBCATEGORIAS: GastoSubcategoria[] = ['Salud', 'Facturas', 'Movilidad', 'Colegio', 'Otro'];
 
 interface AddGastoDialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   categoria: 'casa' | 'peques';
+  /** Provide when editing an existing gasto */
+  initialGasto?: Gasto;
   onAdd: (gasto: Omit<Gasto, 'id'>) => void;
+  onUpdate?: (id: string, changes: Partial<Omit<Gasto, 'id'>>) => void;
 }
-
-const RECURRENCIA_TIPOS = ['días', 'semanas', 'meses', 'años'];
 
 export function AddGastoDialog({
   open,
   onOpenChange,
   categoria,
+  initialGasto,
   onAdd,
+  onUpdate,
 }: AddGastoDialogProps) {
+  const isEdit = !!initialGasto;
+
   const [nombre, setNombre] = useState('');
   const [cantidad, setCantidad] = useState('');
   const [fecha, setFecha] = useState(dateString(new Date()));
   const [esRecurrente, setEsRecurrente] = useState(false);
   const [recurrenciaNumero, setRecurrenciaNumero] = useState('1');
   const [recurrenciaTipo, setRecurrenciaTipo] = useState('meses');
+  const [subcategoria, setSubcategoria] = useState<GastoSubcategoria>('Otro');
+
+  // Pre-fill when editing
+  useEffect(() => {
+    if (initialGasto) {
+      setNombre(initialGasto.nombre);
+      setCantidad(initialGasto.cantidad.toFixed(2));
+      setFecha(initialGasto.fecha);
+      setEsRecurrente(initialGasto.esRecurrente);
+      setRecurrenciaNumero(String(initialGasto.recurrenciaNumero));
+      setRecurrenciaTipo(initialGasto.recurrenciaTipo);
+      setSubcategoria(initialGasto.subcategoria ?? detectSubcategoria(initialGasto.nombre));
+    }
+  }, [initialGasto]);
+
+  // Auto-detect subcategoria as user types (only in add mode)
+  const handleNombreChange = (v: string) => {
+    setNombre(v);
+    if (!isEdit) {
+      setSubcategoria(detectSubcategoria(v));
+    }
+  };
 
   const reset = () => {
     setNombre('');
@@ -51,21 +82,35 @@ export function AddGastoDialog({
     setEsRecurrente(false);
     setRecurrenciaNumero('1');
     setRecurrenciaTipo('meses');
+    setSubcategoria('Otro');
   };
 
   const handleSubmit = () => {
     const cantidadNum = parseFloat(cantidad.replace(',', '.'));
     if (!nombre.trim() || isNaN(cantidadNum) || cantidadNum <= 0) return;
 
-    onAdd({
-      nombre: nombre.trim(),
-      cantidad: cantidadNum,
-      fecha,
-      esRecurrente,
-      recurrenciaNumero: parseInt(recurrenciaNumero, 10) || 1,
-      recurrenciaTipo,
-      categoria,
-    });
+    if (isEdit && onUpdate && initialGasto) {
+      onUpdate(initialGasto.id, {
+        nombre: nombre.trim(),
+        cantidad: cantidadNum,
+        fecha,
+        esRecurrente,
+        recurrenciaNumero: parseInt(recurrenciaNumero, 10) || 1,
+        recurrenciaTipo,
+        subcategoria,
+      });
+    } else {
+      onAdd({
+        nombre: nombre.trim(),
+        cantidad: cantidadNum,
+        fecha,
+        esRecurrente,
+        recurrenciaNumero: parseInt(recurrenciaNumero, 10) || 1,
+        recurrenciaTipo,
+        categoria,
+        subcategoria,
+      });
+    }
 
     reset();
     onOpenChange(false);
@@ -80,7 +125,7 @@ export function AddGastoDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Añadir gasto</DialogTitle>
+          <DialogTitle>{isEdit ? 'Editar gasto' : 'Añadir gasto'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
@@ -91,7 +136,7 @@ export function AddGastoDialog({
               id="nombre"
               placeholder="Ej. Seguro del hogar"
               value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
+              onChange={(e) => handleNombreChange(e.target.value)}
               autoFocus
             />
           </div>
@@ -120,6 +165,26 @@ export function AddGastoDialog({
             />
           </div>
 
+          {/* Subcategoria */}
+          <div className="space-y-1.5">
+            <Label htmlFor="subcategoria">Categoría</Label>
+            <Select
+              value={subcategoria}
+              onValueChange={(v) => { if (v) setSubcategoria(v as GastoSubcategoria); }}
+            >
+              <SelectTrigger id="subcategoria">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SUBCATEGORIAS.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Recurrente */}
           <div className="flex items-center justify-between">
             <Label htmlFor="recurrente" className="text-sm font-medium">
@@ -143,7 +208,10 @@ export function AddGastoDialog({
                 onChange={(e) => setRecurrenciaNumero(e.target.value)}
                 min={1}
               />
-              <Select value={recurrenciaTipo} onValueChange={(v) => { if (v) setRecurrenciaTipo(v); }}>
+              <Select
+                value={recurrenciaTipo}
+                onValueChange={(v) => { if (v) setRecurrenciaTipo(v); }}
+              >
                 <SelectTrigger className="flex-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -171,7 +239,7 @@ export function AddGastoDialog({
               isNaN(parseFloat(cantidad.replace(',', '.')))
             }
           >
-            Añadir
+            {isEdit ? 'Guardar' : 'Añadir'}
           </Button>
         </DialogFooter>
       </DialogContent>

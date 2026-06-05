@@ -20,12 +20,13 @@ import {
   formatShortDate,
   dateString,
 } from '@/lib/dateHelpers';
-import type { Attendance, Payment, AppStore } from '@/lib/types';
+import type { Attendance, Payment, Gasto, AppStore } from '@/lib/types';
 
 interface ReporteTabProps {
   currentMonth: Date;
   attendances: Attendance[];
   payments: Payment[];
+  gastos: Gasto[];
   service: AppStore['service'];
   onAddPayment: (payment: Omit<Payment, 'id'>) => void;
   onDeletePayment: (id: string) => void;
@@ -35,6 +36,7 @@ export function ReporteTab({
   currentMonth,
   attendances,
   payments,
+  gastos,
   service,
   onAddPayment,
   onDeletePayment,
@@ -67,6 +69,13 @@ export function ReporteTab({
     const yearTotalPaid = yearPayments.reduce((s, p) => s + p.amount, 0);
     const yearOutstanding = Math.max(0, yearTotalAmount - yearTotalPaid);
 
+    const gastosCasa = gastos
+      .filter((g) => g.categoria === 'casa' && monthOfDate(g.fecha) === monthKey)
+      .reduce((s, g) => s + g.cantidad, 0);
+    const gastosPeques = gastos
+      .filter((g) => g.categoria === 'peques' && monthOfDate(g.fecha) === monthKey)
+      .reduce((s, g) => s + g.cantidad, 0);
+
     return {
       monthly: {
         key: monthKey,
@@ -75,6 +84,8 @@ export function ReporteTab({
         totalPaid,
         outstanding,
         payments: monthPayments,
+        gastosCasa,
+        gastosPeques,
       },
       yearly: {
         year,
@@ -84,7 +95,7 @@ export function ReporteTab({
         outstanding: yearOutstanding,
       },
     };
-  }, [currentMonth, attendances, payments, service.rate]);
+  }, [currentMonth, attendances, payments, gastos, service.rate]);
 
   const handleMarkPaid = () => {
     if (monthly.outstanding <= 0) return;
@@ -99,7 +110,7 @@ export function ReporteTab({
 
   return (
     <div className="flex flex-col gap-4 pb-6">
-      {/* Monthly summary */}
+      {/* Monthly summary — limpieza */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
@@ -115,6 +126,25 @@ export function ReporteTab({
             label="Pendiente"
             value={eur(monthly.outstanding)}
             highlight={monthly.outstanding > 0}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Gastos del mes — all 3 categories */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Gastos del mes
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 pt-0">
+          <ReportRow label="Limpieza" value={eur(monthly.totalAmount)} />
+          <ReportRow label="Casa" value={eur(monthly.gastosCasa)} />
+          <ReportRow label="Peques" value={eur(monthly.gastosPeques)} />
+          <Separator />
+          <ReportRow
+            label="Total"
+            value={eur(monthly.totalAmount + monthly.gastosCasa + monthly.gastosPeques)}
           />
         </CardContent>
       </Card>

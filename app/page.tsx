@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Loader2, CloudOff, CheckCircle2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MonthNavigator } from '@/components/MonthNavigator';
@@ -8,8 +8,11 @@ import { LimpiezaTab } from '@/components/LimpiezaTab';
 import { GastosTab } from '@/components/GastosTab';
 import { ReporteTab } from '@/components/ReporteTab';
 import { SettingsSheet } from '@/components/SettingsSheet';
+import { NotificationBell } from '@/components/NotificationBell';
 import { useStore, type SyncStatus } from '@/hooks/useStore';
-import { startOfMonth } from '@/lib/dateHelpers';
+import { startOfMonth, dateString } from '@/lib/dateHelpers';
+import { getPendingRecurring } from '@/lib/gastoHelpers';
+import type { Gasto } from '@/lib/types';
 
 function SyncIndicator({ status }: { status: SyncStatus }) {
   if (status === 'idle') return null;
@@ -34,11 +37,30 @@ export default function Home() {
     deletePayment,
     addGasto,
     deleteGasto,
+    updateGasto,
     updateService,
     updateSettings,
   } = useStore();
 
   const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(new Date()));
+
+  const pendingRecurring = useMemo(
+    () => getPendingRecurring(store.gastos, currentMonth),
+    [store.gastos, currentMonth],
+  );
+
+  const handleConfirmRecurring = (gasto: Gasto, cantidad: number) => {
+    addGasto({
+      nombre: gasto.nombre,
+      cantidad,
+      fecha: dateString(new Date()),
+      esRecurrente: gasto.esRecurrente,
+      recurrenciaNumero: gasto.recurrenciaNumero,
+      recurrenciaTipo: gasto.recurrenciaTipo,
+      categoria: gasto.categoria,
+      subcategoria: gasto.subcategoria,
+    });
+  };
 
   // Apply theme preference
   useEffect(() => {
@@ -67,19 +89,25 @@ export default function Home() {
     <div className="flex flex-col min-h-screen max-w-lg mx-auto">
       {/* ── Header ── */}
       <header className="flex items-center justify-between px-4 pt-6 pb-2">
-        <div className="flex flex-col gap-0.5">
-          <h1 className="text-2xl font-bold tracking-tight">
-            Hola{' '}
+        <div className="flex flex-col gap-0">
+          <p className="text-base font-medium text-muted-foreground">Hola,</p>
+          <h1 className="text-3xl font-extrabold tracking-tight leading-tight">
             <span className="text-primary">{store.settings.familyName}</span>
           </h1>
           <SyncIndicator status={syncStatus} />
         </div>
-        <SettingsSheet
-          service={store.service}
-          settings={store.settings}
-          onUpdateService={updateService}
-          onUpdateSettings={updateSettings}
-        />
+        <div className="flex items-center gap-1">
+          <NotificationBell
+            pending={pendingRecurring}
+            onConfirm={handleConfirmRecurring}
+          />
+          <SettingsSheet
+            service={store.service}
+            settings={store.settings}
+            onUpdateService={updateService}
+            onUpdateSettings={updateSettings}
+          />
+        </div>
       </header>
 
       {/* ── Month navigator ── */}
@@ -114,6 +142,7 @@ export default function Home() {
               categoria="casa"
               onAdd={addGasto}
               onDelete={deleteGasto}
+              onUpdate={updateGasto}
             />
           </TabsContent>
 
@@ -124,6 +153,7 @@ export default function Home() {
               categoria="peques"
               onAdd={addGasto}
               onDelete={deleteGasto}
+              onUpdate={updateGasto}
             />
           </TabsContent>
 
@@ -132,6 +162,7 @@ export default function Home() {
               currentMonth={currentMonth}
               attendances={store.attendances}
               payments={store.payments}
+              gastos={store.gastos}
               service={store.service}
               onAddPayment={addPayment}
               onDeletePayment={deletePayment}

@@ -20,6 +20,8 @@ export interface Payment {
   note: string;
 }
 
+export type GastoSubcategoria = 'Salud' | 'Facturas' | 'Movilidad' | 'Colegio' | 'Otro';
+
 export interface Gasto {
   id: string;
   nombre: string;
@@ -29,6 +31,7 @@ export interface Gasto {
   recurrenciaNumero: number;
   recurrenciaTipo: string;
   categoria: 'casa' | 'peques';
+  subcategoria?: GastoSubcategoria;
 }
 
 export interface AppSettings {

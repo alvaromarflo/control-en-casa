@@ -70,3 +70,15 @@ export function monthOfDate(dateStr: string): string {
 export function yearOfMonth(monthKey: string): number {
   return parseInt(monthKey.slice(0, 4), 10);
 }
+
+/** Advances a date by one recurrence period (días / semanas / meses / años). */
+export function addPeriodToDate(date: Date, num: number, tipo: string): Date {
+  const d = new Date(date);
+  switch (tipo) {
+    case 'días':    d.setDate(d.getDate() + num); break;
+    case 'semanas': d.setDate(d.getDate() + num * 7); break;
+    case 'meses':   d.setMonth(d.getMonth() + num); break;
+    case 'años':    d.setFullYear(d.getFullYear() + num); break;
+  }
+  return d;
+}

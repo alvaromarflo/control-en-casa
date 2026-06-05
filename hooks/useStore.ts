@@ -201,6 +201,16 @@ export function useStore() {
     [update]
   );
 
+  const updateGasto = useCallback(
+    (id: string, changes: Partial<Omit<Gasto, 'id'>>) => {
+      update((prev) => ({
+        ...prev,
+        gastos: prev.gastos.map((g) => (g.id === id ? { ...g, ...changes } : g)),
+      }));
+    },
+    [update]
+  );
+
   // ── Service ───────────────────────────────────────────────────────────────
 
   const updateService = useCallback(
@@ -235,6 +245,7 @@ export function useStore() {
     deletePayment,
     addGasto,
     deleteGasto,
+    updateGasto,
     updateService,
     updateSettings,
   };
