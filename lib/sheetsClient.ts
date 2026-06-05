@@ -10,7 +10,9 @@ export const TABS = {
 
 function getAuth() {
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const key = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  // Vercel stores multiline values with literal \n — normalise both cases
+  const rawKey = process.env.GOOGLE_PRIVATE_KEY ?? '';
+  const key = rawKey.includes('\\n') ? rawKey.replace(/\\n/g, '\n') : rawKey;
 
   if (!email || !key) {
     throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY env vars');
