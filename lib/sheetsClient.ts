@@ -9,25 +9,24 @@ export const TABS = {
 } as const;
 
 function getAuth() {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  // Vercel stores multiline values with literal \n — normalise both cases
-  const rawKey = process.env.GOOGLE_PRIVATE_KEY ?? '';
-  const key = rawKey.includes('\\n') ? rawKey.replace(/\\n/g, '\n') : rawKey;
+  const b64 = process.env.GOOGLE_CREDENTIALS_B64;
 
-  if (!email || !key) {
-    throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY env vars');
+  if (!b64) {
+    throw new Error('Missing GOOGLE_CREDENTIALS_B64 env var');
   }
 
-  return new google.auth.JWT({
-    email,
-    key,
+  // Decode the base64-encoded service account JSON — avoids all \n escaping issues in Vercel
+  const credentials = JSON.parse(Buffer.from(b64, 'base64').toString('utf-8'));
+
+  return new google.auth.GoogleAuth({
+    credentials,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
 }
 
 export function getSheetsClient() {
   const auth = getAuth();
-  return google.sheets({ version: 'v4', auth });
+  return google.sheets({ version: 'v4', auth: auth as Parameters<typeof google.sheets>[0]['auth'] });
 }
 
 export function getSpreadsheetId(): string {
