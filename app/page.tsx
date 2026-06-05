@@ -190,10 +190,10 @@ export default function Home() {
       <div className="fixed bottom-6 right-4 z-40">
         <Button
           size="lg"
-          className="rounded-full shadow-lg gap-2 pr-5"
+          className="rounded-full shadow-xl gap-2.5 px-6 py-6 text-base font-semibold"
           onClick={() => setReporteOpen(true)}
         >
-          <BarChart2 className="h-5 w-5" />
+          <BarChart2 className="h-6 w-6" />
           Reporte del mes
         </Button>
       </div>
