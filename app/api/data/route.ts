@@ -46,7 +46,7 @@ export async function GET() {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[GET /api/data]', message);
     return NextResponse.json(
-      { error: 'No se pudo cargar los datos.', detail: message },
+      { error: 'No se pudo cargar los datos.' },
       { status: 500 }
     );
   }
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[POST /api/data]', message);
     return NextResponse.json(
-      { error: 'No se pudo guardar los datos.', detail: message },
+      { error: 'No se pudo guardar los datos.' },
       { status: 500 }
     );
   }
