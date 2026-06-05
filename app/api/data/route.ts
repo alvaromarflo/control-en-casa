@@ -43,9 +43,10 @@ export async function GET() {
 
     return NextResponse.json(store);
   } catch (err) {
-    console.error('[GET /api/data]', err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('[GET /api/data]', message);
     return NextResponse.json(
-      { error: 'No se pudo cargar los datos.' },
+      { error: 'No se pudo cargar los datos.', detail: message },
       { status: 500 }
     );
   }
@@ -68,9 +69,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error('[POST /api/data]', err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('[POST /api/data]', message);
     return NextResponse.json(
-      { error: 'No se pudo guardar los datos.' },
+      { error: 'No se pudo guardar los datos.', detail: message },
       { status: 500 }
     );
   }
