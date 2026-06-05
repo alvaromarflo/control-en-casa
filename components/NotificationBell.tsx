@@ -61,7 +61,7 @@ export function NotificationBell({ pending, onConfirm }: NotificationBellProps) 
 
       {/* Pending list sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full max-w-sm flex flex-col gap-4">
+        <SheetContent side="bottom" className="max-h-[80vh] flex flex-col gap-4 rounded-t-xl">
           <SheetHeader>
             <SheetTitle>Gastos recurrentes pendientes</SheetTitle>
           </SheetHeader>

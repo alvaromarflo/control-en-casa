@@ -43,7 +43,7 @@ export function SettingsSheet({
           <Settings className="h-5 w-5" />
         </SheetTrigger>
 
-      <SheetContent side="right" className="w-80 sm:w-96 p-5">
+      <SheetContent side="bottom" className="max-h-[85vh] p-5 rounded-t-xl overflow-y-auto">
         <SheetHeader className="p-0">
           <SheetTitle>Ajustes</SheetTitle>
         </SheetHeader>

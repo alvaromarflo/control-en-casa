@@ -110,26 +110,6 @@ export function ReporteTab({
 
   return (
     <div className="flex flex-col gap-4 pb-6">
-      {/* Monthly summary — limpieza */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-            Resumen del mes
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 pt-0">
-          <ReportRow label="Visitas registradas" value={`${monthly.visitCount}`} />
-          <ReportRow label="Total a pagar" value={eur(monthly.totalAmount)} />
-          <ReportRow label="Pagado" value={eur(monthly.totalPaid)} />
-          <Separator />
-          <ReportRow
-            label="Pendiente"
-            value={eur(monthly.outstanding)}
-            highlight={monthly.outstanding > 0}
-          />
-        </CardContent>
-      </Card>
-
       {/* Gastos del mes — all 3 categories */}
       <Card>
         <CardHeader className="pb-2">
