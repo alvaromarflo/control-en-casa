@@ -12,13 +12,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { dateString } from '@/lib/dateHelpers';
 import { detectSubcategoria } from '@/lib/gastoHelpers';
 import type { Gasto, GastoSubcategoria } from '@/lib/types';
@@ -137,7 +130,6 @@ export function AddGastoDialog({
               placeholder="Ej. Seguro del hogar"
               value={nombre}
               onChange={(e) => handleNombreChange(e.target.value)}
-              autoFocus
             />
           </div>
 
@@ -168,21 +160,16 @@ export function AddGastoDialog({
           {/* Subcategoria */}
           <div className="space-y-1.5">
             <Label htmlFor="subcategoria">Categoría</Label>
-            <Select
+            <select
+              id="subcategoria"
               value={subcategoria}
-              onValueChange={(v) => { if (v) setSubcategoria(v as GastoSubcategoria); }}
+              onChange={(e) => setSubcategoria(e.target.value as GastoSubcategoria)}
+              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring dark:bg-input/30"
             >
-              <SelectTrigger id="subcategoria">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SUBCATEGORIAS.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {SUBCATEGORIAS.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
           </div>
 
           {/* Recurrente */}
@@ -208,21 +195,15 @@ export function AddGastoDialog({
                 onChange={(e) => setRecurrenciaNumero(e.target.value)}
                 min={1}
               />
-              <Select
+              <select
                 value={recurrenciaTipo}
-                onValueChange={(v) => { if (v) setRecurrenciaTipo(v); }}
+                onChange={(e) => setRecurrenciaTipo(e.target.value)}
+                className="flex-1 h-8 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring dark:bg-input/30"
               >
-                <SelectTrigger className="flex-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {RECURRENCIA_TIPOS.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {RECURRENCIA_TIPOS.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
             </div>
           )}
         </div>

@@ -52,6 +52,7 @@ export function gastoToRow(g: Gasto): string[] {
     String(g.recurrenciaNumero),
     g.recurrenciaTipo,
     g.categoria,
+    g.subcategoria ?? 'Otro',
   ];
 }
 
@@ -65,6 +66,7 @@ export function rowToGasto(r: string[]): Gasto {
     recurrenciaNumero: Number(r[5]) || 1,
     recurrenciaTipo: r[6] ?? 'meses',
     categoria: (r[7] as Gasto['categoria']) ?? 'casa',
+    subcategoria: (r[8] as Gasto['subcategoria']) ?? 'Otro',
   };
 }
 

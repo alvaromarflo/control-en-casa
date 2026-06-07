@@ -139,6 +139,11 @@ export function GastosTab({
         </div>
       ) : (
         <>
+          <Button onClick={() => setShowAdd(true)} className="w-full">
+            <Plus className="h-4 w-4 mr-1.5" />
+            Añadir gasto
+          </Button>
+
           <Card>
             <CardContent className="p-0 divide-y divide-border">
               {monthGastos.map((gasto) => (
@@ -151,11 +156,6 @@ export function GastosTab({
               ))}
             </CardContent>
           </Card>
-
-          <Button onClick={() => setShowAdd(true)} className="w-full">
-            <Plus className="h-4 w-4 mr-1.5" />
-            Añadir gasto
-          </Button>
         </>
       )}
 
